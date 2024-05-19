@@ -11,7 +11,6 @@
 #define vincita 4
 
 // colori
-
 #define ANSI_COLOR_RED "\x1b[31m"
 #define ANSI_COLOR_GREEN "\x1b[32m"
 #define ANSI_COLOR_YELLOW "\x1b[33m"
@@ -28,30 +27,25 @@
 
 void inizializza_campo(int riga, int colonna, char mat[riga][colonna]);
 void stampaCampo(int riga, int colonna, char mat[riga][colonna]);
-int controlloVincita(char giocatore, int riga, int colonna,
-                     char mat[riga][colonna]);
-int inserisciPallina(int col, char giocatore, int riga, int colonna,
-                     char mat[riga][colonna]);
+int controlloVincita(char giocatore, int riga, int colonna, char mat[riga][colonna]);
+int inserisciPallina(int col, char giocatore, int riga, int colonna, char mat[riga][colonna]);
 void inserisciNomiGiocatori(char *giocatore1, char *giocatore2);
+void cancellaSchermo();
 void visualizzaRegole();
 void visualizzaCrediti();
+ 
 
 int main() {
-
   char campo[righe][colonne];
   char giocatore1[50] = "Rosso";
   char giocatore2[50] = "Giallo";
-
-  int turno = 0; // 0: rosso, 1: giallo
-  int scelta;
-  int colonna;
+  int turno, scelta, colonna, altraPartita;
 
   while (1) {
+    cancellaSchermo();
 
     printf(ANSI_COLOR_B_RED "Menu:" ANSI_COLOR_RESET "\n");
-    printf(
-        ANSI_COLOR_GREEN
-        "1 - Inserisci nomi giocatori e inizia la partita\n" ANSI_COLOR_RESET);
+    printf(ANSI_COLOR_GREEN "1 - Inserisci nomi giocatori e inizia la partita\n" ANSI_COLOR_RESET);
     printf(ANSI_COLOR_BLUE "2 - Regole\n" ANSI_COLOR_RESET);
     printf(ANSI_COLOR_MAGENTA "3 - Crediti\n" ANSI_COLOR_RESET);
     printf(ANSI_COLOR_ORANGE "4 - Uscita\n" ANSI_COLOR_RESET);
@@ -64,49 +58,45 @@ int main() {
       break;
     case 2:
       visualizzaRegole();
-      break;
+      continue;
     case 3:
       visualizzaCrediti();
-      break;
+      continue;
     case 4:
       exit(0);
-      break;
     default:
       printf(ANSI_COLOR_RED "Scelta non valida! Riprova!\n" ANSI_COLOR_RESET);
       sleep(2); // Pausa di 2 secondi per consentire la lettura del messaggio
-      break;
+      continue;
     }
 
     if (scelta == 1) {
-      break; // Se l'utente ha scelto di iniziare la partita, esce dal loop del
-             // menu
-    }
-  }
+      do {
+        turno = 0; // 0: rosso, 1: giallo
+        inizializza_campo(righe, colonne, campo);
+        stampaCampo(righe, colonne, campo);
 
-  // Avvia il gioco dopo che i nomi dei giocatori sono stati inseriti
-  inizializza_campo(righe, colonne, campo);
-  stampaCampo(righe, colonne, campo);
+        while (1) {
+          printf("Giocatore " ANSI_COLOR_B_GREEN "%s" ANSI_COLOR_RESET ", inserisci la colonna (0-6): ", turno == 0 ? giocatore1 : giocatore2);
+          scanf("%d", &colonna);
 
-  while (1) {
-    printf("Giocatore " ANSI_COLOR_B_GREEN "%s" ANSI_COLOR_RESET
-           ", inserisci la colonna (0-6): ",
-           turno == 0 ? giocatore1 : giocatore2);
-    scanf("%d", &colonna);
+          if (inserisciPallina(colonna, turno == 0 ? ROSSO : GIALLO, righe, colonne, campo)) {
+            cancellaSchermo();
+            stampaCampo(righe, colonne, campo);
+            if (controlloVincita(turno == 0 ? ROSSO : GIALLO, righe, colonne, campo)) {
+              printf(ANSI_COLOR_GREEN "Il giocatore %s ha vinto!\n" ANSI_COLOR_RESET, turno == 0 ? giocatore1 : giocatore2);
+              break;
+            }
+            turno = (turno + 1) % 2;
+          } else {
+            printf(ANSI_COLOR_RED "Mossa non valida. Riprova.\n" ANSI_COLOR_RESET);
+          }
+        }
 
-    if (inserisciPallina(colonna, turno == 0 ? ROSSO : GIALLO, righe, colonne,
-                         campo)) {
-      system(
-          "clear"); // Cancella lo schermo prima di stampare il campo aggiornato
-      stampaCampo(righe, colonne, campo);
-      if (controlloVincita(turno == 0 ? ROSSO : GIALLO, righe, colonne,
-                           campo)) {
-        printf(ANSI_COLOR_GREEN "Il giocatore %s ha vinto!\n",
-               turno == 0 ? giocatore1 : giocatore2, ANSI_COLOR_RESET);
-        break;
-      }
-      turno = (turno + 1) % 2;
-    } else {
-      printf(ANSI_COLOR_RED "Mossa non valida. Riprova.\n" ANSI_COLOR_RESET);
+        printf(ANSI_COLOR_GREEN "Vuoi fare un'altra partita? (1 - Si, 0 - No): " ANSI_COLOR_RESET);
+        scanf("%d", &altraPartita);
+        cancellaSchermo();
+      } while (altraPartita);
     }
   }
   return 0;
@@ -140,8 +130,7 @@ void stampaCampo(int riga, int colonna, char mat[riga][colonna]) {
   printf("---------------\n");
 }
 
-int controlloVincita(char giocatore, int riga, int colonna,
-                     char mat[riga][colonna]) {
+int controlloVincita(char giocatore, int riga, int colonna, char mat[riga][colonna]) {
   // Controllo orizzontale
   int i, j, k;
   for (i = 0; i < righe; i++) {
@@ -213,8 +202,7 @@ int controlloVincita(char giocatore, int riga, int colonna,
   return 0;
 }
 
-int inserisciPallina(int col, char giocatore, int riga, int colonna,
-                     char mat[riga][colonna]) {
+int inserisciPallina(int col, char giocatore, int riga, int colonna, char mat[riga][colonna]) {
   if (col < 0 || col >= colonna) {
     return 0;
   }
@@ -225,30 +213,32 @@ int inserisciPallina(int col, char giocatore, int riga, int colonna,
       return 1;
     }
   }
+  return 0;
+}
+
+void cancellaSchermo() {
+    #ifdef _WIN32
+        system("cls");
+    #else
+        system("clear");
+    #endif
 }
 
 void inserisciNomiGiocatori(char *giocatore1, char *giocatore2) {
-  printf(ANSI_COLOR_BLUE
-         "Inserisci il nome del giocatore 1: " ANSI_COLOR_RESET);
+  printf(ANSI_COLOR_BLUE "Inserisci il nome del giocatore 1: " ANSI_COLOR_RESET);
   scanf("%s", giocatore1);
-  printf(ANSI_COLOR_BLUE
-         "Inserisci il nome del giocatore 2: " ANSI_COLOR_RESET);
+  printf(ANSI_COLOR_BLUE "Inserisci il nome del giocatore 2: " ANSI_COLOR_RESET);
   scanf("%s", giocatore2);
 }
 
 void visualizzaRegole() {
   printf("\nLe regole del gioco sono:\n\n");
-  printf("- Il gioco viene giocato su una griglia verticale composta da 6 "
-         "righe e 7 colonne.\n");
-  printf("- I giocatori scelgono a turno una colonna in cui far cadere il "
-         "proprio pezzo.\n");
-  printf("- Lo scopo del gioco è allineare quattro pezzi dello stesso colore "
-         "in orizzontale, verticale o diagonale.\n");
-  printf("- Il primo giocatore a ottenere un allineamento di quattro pezzi "
-         "vince la partita.\n\n");
+  printf("- Il gioco viene giocato su una griglia verticale composta da 6 righe e 7 colonne.\n");
+  printf("- I giocatori scelgono a turno una colonna in cui far cadere il proprio pezzo.\n");
+  printf("- Lo scopo del gioco è allineare quattro pezzi dello stesso colore in orizzontale, verticale o diagonale.\n");
+  printf("- Il primo giocatore a ottenere un allineamento di quattro pezzi vince la partita.\n\n");
 }
 
 void visualizzaCrediti() {
-  printf("\nQuesto gioco è stato sviluppato da : \n\nMauro Retini Causa\nMarco "
-         "Bruno\nDaniel Lombardo\nFrancesco Montagna.\n\nScarica il gioco da https://github.com/Videogamesmauro/Forza-4\n\n");
+  printf("\nQuesto gioco è stato sviluppato da : \n\nMauro Retini Causa\nMarco Bruno\nDaniel Lombardo\nFrancesco Montagna.\n\nScarica il gioco da https://github.com/Videogamesmauro/Forza-4\n\n");
 }
