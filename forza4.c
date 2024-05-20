@@ -33,7 +33,7 @@ void inserisciNomiGiocatori(char *giocatore1, char *giocatore2);
 void cancellaSchermo();
 void visualizzaRegole();
 void visualizzaCrediti();
- 
+
 
 int main() {
   char campo[righe][colonne];
@@ -42,32 +42,34 @@ int main() {
   int turno, scelta, colonna, altraPartita;
 
   while (1) {
+
     cancellaSchermo();
 
-    printf(ANSI_COLOR_B_RED "Menu:" ANSI_COLOR_RESET "\n");
+    printf(ANSI_COLOR_B_YELLOW "M" ANSI_COLOR_GREEN "e" ANSI_COLOR_RED "n"ANSI_COLOR_BLUE "u:" ANSI_COLOR_RESET"\n");
     printf(ANSI_COLOR_GREEN "1 - Inserisci nomi giocatori e inizia la partita\n" ANSI_COLOR_RESET);
     printf(ANSI_COLOR_BLUE "2 - Regole\n" ANSI_COLOR_RESET);
     printf(ANSI_COLOR_MAGENTA "3 - Crediti\n" ANSI_COLOR_RESET);
     printf(ANSI_COLOR_ORANGE "4 - Uscita\n" ANSI_COLOR_RESET);
-    printf(ANSI_COLOR_GRAY "Scelta: " ANSI_COLOR_RESET);
+    printf(ANSI_COLOR_RED "Scelta: " ANSI_COLOR_RESET);
     scanf("%d", &scelta);
 
     switch (scelta) {
     case 1:
-      inserisciNomiGiocatori(giocatore1, giocatore2);
-      break;
+        inserisciNomiGiocatori(giocatore1, giocatore2);
+        break;
     case 2:
-      visualizzaRegole();
-      continue;
+        visualizzaRegole();
+        sleep(5);
+        break;
     case 3:
-      visualizzaCrediti();
-      continue;
+        visualizzaCrediti();
+        sleep(2);
     case 4:
-      exit(0);
-    default:
-      printf(ANSI_COLOR_RED "Scelta non valida! Riprova!\n" ANSI_COLOR_RESET);
-      sleep(2); // Pausa di 2 secondi per consentire la lettura del messaggio
-      continue;
+        exit(0);
+        default:
+        printf(ANSI_COLOR_RED "Scelta non valida! Riprova!\n" ANSI_COLOR_RESET);
+        sleep(2);
+        break;
     }
 
     if (scelta == 1) {
@@ -95,6 +97,9 @@ int main() {
 
         printf(ANSI_COLOR_GREEN "Vuoi fare un'altra partita? (1 - Si, 0 - No): " ANSI_COLOR_RESET);
         scanf("%d", &altraPartita);
+        if (altraPartita == 0) {
+            exit(0);
+        }
         cancellaSchermo();
       } while (altraPartita);
     }
